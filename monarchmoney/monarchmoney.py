@@ -2844,7 +2844,7 @@ class MonarchMoney(object):
         data = {
             "password": password,
             "supports_mfa": True,
-            "trusted_device": False,
+            "trusted_device": True,
             "username": email,
         }
 
@@ -2863,6 +2863,13 @@ class MonarchMoney(object):
                     )
 
                 response = await resp.json()
+                tokexp = response.get("tokenExpiration")
+
+                if tokexp not in (None, "null"):
+                    raise LoginFailedException(
+                        f"Short-lived token returned (tokenExpiration={tokexp})."
+                    )
+
                 self.set_token(response["token"])
                 self._headers["Authorization"] = f"Token {self._token}"
 
@@ -2876,7 +2883,7 @@ class MonarchMoney(object):
             "password": password,
             "supports_mfa": True,
             "totp": code,
-            "trusted_device": False,
+            "trusted_device": True,
             "username": email,
         }
 
@@ -2900,6 +2907,13 @@ class MonarchMoney(object):
                             f"HTTP Code {resp.status}: {resp.reason}\nRaw response: {resp.text}"
                         )
                 response = await resp.json()
+                tokexp = response.get("tokenExpiration")
+
+                if tokexp not in (None, "null"):
+                    raise LoginFailedException(
+                        f"Short-lived token returned (tokenExpiration={tokexp})."
+                    )
+
                 self.set_token(response["token"])
                 self._headers["Authorization"] = f"Token {self._token}"
 
